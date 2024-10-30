@@ -205,61 +205,6 @@ public class HillCipher {
 
     }
 
-    public static RealMatrix getKeyFromAttack(String plaintext, String ciphertext, int keySize) {
-
-        // we only need this much to solve it, best we substring to make our lives easier
-        plaintext = plaintext.substring(0, keySize*keySize);
-        ciphertext = ciphertext.substring(0, keySize*keySize);
-
-        // thus SAME ORDER AS EARLIER: which we did text * key -> other text
-        // thus: plaintext * key, 1xn * nxn = 1xn
-        // we should have n systems so we can solve for all unknowns
-
-        // looping number of key size because that is how many systems we need
-        RealMatrix currentPlaintextMatrix = getMatrixFromText(plaintext, keySize);
-        RealMatrix currentCiphertextMatrix = getMatrixFromText(ciphertext, keySize);
-        for (int i = 0; i < keySize; i++) {
-
-            double[] currentCiphertextVector = currentCiphertextMatrix.getColumn(i);
-
-            boolean validVector = false;
-
-            for (int h = 0; h < 26; h++) {
-                for (int j = 0; j < 26; j++) {
-                    for (int k = 0; k < 26; k++) {
-
-                        RealVector vector2 = null;
-
-                        for (int g = 0; g < keySize; g++) {
-
-                            vector2 = new ArrayRealVector(new double[]{h, j, k});
-
-                            if ((int) (new ArrayRealVector(currentPlaintextMatrix.getRow(g))).dotProduct(vector2) % 26 == (int) currentCiphertextVector[g]) {
-                                validVector = true;
-                            }
-                            else {
-                                validVector = false;
-                            }
-                        }
-
-                        if (validVector) {
-                            System.out.println(vector2);
-                        }
-
-                    }
-                }
-            }
-
-
-
-            // we known that cPM * K = cCM
-
-        }
-
-        return null;
-    }
-
-
     // STEP 0: from plaintext to matrix
 
     // STEP 1: need to get adjoint of matrix
