@@ -100,12 +100,16 @@ public class HillCipher {
             x += modulo;
         }
 
-        x = x & modulo;
+        x = x % modulo;
+
+        // Simplest way to find inverse modulo: check all numbers up until the modulo
         for (int i = 1; i < modulo; i++) {
-            if ((x * i) % CIPHER_MODULO == 1) {
+            if ((x * i) % modulo == 1) {
                 return i;
             }
         }
+
+        // If the number has no inverse modulo, return -1
         return -1;
     }
 
