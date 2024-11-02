@@ -5,8 +5,9 @@ import java.util.ArrayList;
 
 public class HillCipher {
 
-    private static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    private static final int paddingValue = 23; // equivalent to X
+    private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+    private static final int PADDING_VALUE = 23; // equivalent to X
+    public static final int CIPHER_MODULO = 26;
 
     public static String removeGrammarAndWhitespace(String plaintext) {
         return plaintext.replaceAll("[\\p{Punct}\\s]", "").toLowerCase();
@@ -31,10 +32,10 @@ public class HillCipher {
             int currentRow = i % blockSize; // integer modulus gives us the current row
             int currentColumn = i / blockSize; // integer floor division gives us the column
 
-            double nextDataValue = paddingValue;
+            double nextDataValue = PADDING_VALUE;
 
             if (i < text.length()) {
-                nextDataValue = alphabet.indexOf(text.charAt(i));
+                nextDataValue = ALPHABET.indexOf(text.charAt(i));
             }
 
             data[currentColumn][currentRow] = nextDataValue;
@@ -50,9 +51,7 @@ public class HillCipher {
 
         RealMatrix cofactorMatrix = new Array2DRowRealMatrix(matrix.getRowDimension(), matrix.getColumnDimension());
 
-
-
-// Calculate cofactors for each element
+        // Calculate cofactors for each element
 
         for (int i = 0; i < matrix.getRowDimension(); i++) {
 
@@ -103,7 +102,7 @@ public class HillCipher {
 
         x = x & modulo;
         for (int i = 1; i < modulo; i++) {
-            if ((x * i) % 26 == 1) {
+            if ((x * i) % CIPHER_MODULO == 1) {
                 return i;
             }
         }
@@ -114,7 +113,7 @@ public class HillCipher {
 
         int determinant = (int) new EigenDecomposition(matrix).getDeterminant();
 
-        return getInverseModulo(determinant, 26); // Inverse doesn't exist
+        return getInverseModulo(determinant, CIPHER_MODULO); // Inverse doesn't exist
 
     }
 
@@ -127,7 +126,7 @@ public class HillCipher {
 
         RealMatrix keyTextToMatrix = getMatrixFromText(keyText, keySize);
 
-        return (ArithmeticUtils.gcd((int) (new EigenDecomposition(keyTextToMatrix).getDeterminant()), 26) == 1);
+        return (ArithmeticUtils.gcd((int) (new EigenDecomposition(keyTextToMatrix).getDeterminant()), CIPHER_MODULO) == 1);
 
     }
 
@@ -143,7 +142,7 @@ public class HillCipher {
                 RealVector v1 = new ArrayRealVector(currentPlaintextRow);
                 RealVector v2 = new ArrayRealVector(currentKeyColumn);
 
-                ciphertext += alphabet.charAt(((int) (v1.dotProduct(v2)) % 26));
+                ciphertext += ALPHABET.charAt(((int) (v1.dotProduct(v2)) % CIPHER_MODULO));
             }
 
         }
@@ -166,9 +165,9 @@ public class HillCipher {
                 double newValue = inverseDeterminant * keyInverseMatrix.getEntry(i, j);
 
                 while (newValue < 0) {
-                    newValue += 26;
+                    newValue += CIPHER_MODULO;
                 }
-                newValue = newValue % 26;
+                newValue = newValue % CIPHER_MODULO;
 
                 newValue = Math.round(newValue);
 
@@ -193,7 +192,7 @@ public class HillCipher {
                 RealVector v1 = new ArrayRealVector(currentPlaintextRow);
                 RealVector v2 = new ArrayRealVector(currentKeyColumn);
 
-                plaintext += alphabet.charAt(((int) (v1.dotProduct(v2)) % 26));
+                plaintext += ALPHABET.charAt(((int) (v1.dotProduct(v2)) % CIPHER_MODULO));
             }
 
         }
