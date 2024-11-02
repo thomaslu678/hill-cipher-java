@@ -14,6 +14,7 @@ public class HillCipher {
 
     public static RealMatrix getMatrixFromText(String text, int blockSize) {
 
+        // Cleaning up the input text so it only contains a String of alphabet characters
         text = removeGrammarAndWhitespace(text);
 
         // 24 / 5 = we need 5 outer blocks with 1 padding
@@ -25,23 +26,19 @@ public class HillCipher {
         double[][] data = new double[numRows][blockSize];
 
         // looping through every element of the plaintext so we can place it in our data array
-        for (int i = 0; i < text.length(); i++) {
-
-            // convert each letter into its respective numerical value
-            int currentCharacterNumericalValue = alphabet.indexOf(text.charAt(i));
+        for (int i = 0; i < data.length * data[0].length; i++) {
 
             int currentRow = i % blockSize; // integer modulus gives us the current row
             int currentColumn = i / blockSize; // integer floor division gives us the column
-            data[currentColumn][currentRow] = currentCharacterNumericalValue; // setting the values
 
-        }
+            double nextDataValue = paddingValue;
 
-        // connect these two
+            if (i < text.length()) {
+                nextDataValue = alphabet.indexOf(text.charAt(i));
+            }
 
-        for (int i = text.length(); i < data.length * data[0].length; i++) {
-            int currentRow = i % blockSize;
-            int currentColumn = i / blockSize;
-            data[currentColumn][currentRow] = paddingValue;
+            data[currentColumn][currentRow] = nextDataValue;
+
         }
 
         return MatrixUtils.createRealMatrix(data);
@@ -228,25 +225,31 @@ public class HillCipher {
 
     public static void main(String[] args) {
 
-
-        var matrix = getMatrixFromText("XQCHJAVRGPBT", 3);
-
-        String keyText = "BEAHLCAFB";
-        var keyMatrix = getMatrixFromText(keyText, 3);
-
-        String keyText1 = "ABBA";
-        var keyMatrix1 = getMatrixFromText(keyText1, 2);
-
+//        var matrix = getMatrixFromText("XQCHJAVRGPBT", 3);
+//
+//        String keyText = "BEAHLCAFB";
+//        var keyMatrix = getMatrixFromText(keyText, 3);
+//
+//        String keyText1 = "ABBA";
+//        var keyMatrix1 = getMatrixFromText(keyText1, 2);
+//
         String plaintext = "time to study!";
         var plaintextMatrix = getMatrixFromText(plaintext, 3);
 
-//        System.out.println(getEncryptedText("help", "azza", 2));
+        System.out.println(plaintextMatrix);
+        /*
+        19 8 12
+        4 19 14
+        18 19 20
+        3 24 23
+         */
+
+//        System.out.println(getEncryptedText("imgonnanuttobinarysearchtreexx", "BEAHLCAFB", 3));
 
 //        System.out.println(getInverseKey(getMatrixFromPlaintext(keyText, 3)));
 
-//        System.out.println(getDecryptedText("delt", "azza", 2));
+//        System.out.println(getDecryptedText("omebennjuwrafbdpvgumifvlixmjur", "BEAHLCAFB", 3));
 
-        System.out.println(getKeyFromAttack("time to " + "study", "XQCHJAVRGPBT", 3));
 
         /*
         known plaintext: imgonnanuttobinarysearchtreexx
