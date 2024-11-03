@@ -1,6 +1,8 @@
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.ArithmeticUtils;
+import org.apache.commons.math3.util.Precision;
 
+import java.time.chrono.IsoEra;
 import java.util.ArrayList;
 
 public class HillCipher {
@@ -8,11 +10,23 @@ public class HillCipher {
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
     private static final int PADDING_VALUE = 23; // equivalent to X
     public static final int CIPHER_MODULO = 26;
+    public static final double EPSILON = 10E-12;
 
+    /**
+     *
+     * @param plaintext
+     * @return
+     */
     public static String removeGrammarAndWhitespace(String plaintext) {
         return plaintext.replaceAll("[\\p{Punct}\\s]", "").toLowerCase();
     }
 
+    /**
+     *
+     * @param text
+     * @param blockSize
+     * @return
+     */
     public static RealMatrix getMatrixFromText(String text, int blockSize) {
 
         // Cleaning up the input text so it only contains a String of alphabet characters
@@ -46,9 +60,14 @@ public class HillCipher {
 
     }
 
+    /**
+     *
+     * @param matrix
+     * @return
+     */
     public static RealMatrix getAdjointMatrix(RealMatrix matrix) {
-        // Create a new matrix to store cofactors
 
+        // Create a new matrix to store cofactors
         RealMatrix cofactorMatrix = new Array2DRowRealMatrix(matrix.getRowDimension(), matrix.getColumnDimension());
 
         // Calculate cofactors for each element
@@ -95,6 +114,12 @@ public class HillCipher {
         return cofactorMatrix.transpose();
     }
 
+    /**
+     *
+     * @param x
+     * @param modulo
+     * @return
+     */
     public static int getInverseModulo(int x, int modulo) {
         while (x < 0) {
             x += modulo;
@@ -113,16 +138,33 @@ public class HillCipher {
         return -1;
     }
 
-    public static int getInverseDeterminant(RealMatrix matrix) {
+    /**
+     *
+     * @param matrix
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static int getInverseDeterminant(RealMatrix matrix) throws IllegalArgumentException {
 
-        int determinant = (int) new EigenDecomposition(matrix).getDeterminant();
+        double determinant = new EigenDecomposition(matrix).getDeterminant();
 
-        return getInverseModulo(determinant, CIPHER_MODULO); // Inverse doesn't exist
+        if (Precision.compareTo(determinant, (int) determinant, EPSILON) != 0) {
+            // means the determinant is not an integer, which we cannot use
+            throw new IllegalArgumentException("The determinant of your matrix is not an integer!");
+        }
+
+        return getInverseModulo((int) determinant, CIPHER_MODULO); // Inverse doesn't exist
 
     }
 
-    // FIX
-    public static boolean isValidKey(String keyText, int keySize) {
+    /**
+     *
+     * @param keyText
+     * @param keySize
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static boolean isValidKey(String keyText, int keySize) throws IllegalArgumentException{
 
         if (keySize * keySize != keyText.length()) {
             return false;
@@ -130,10 +172,25 @@ public class HillCipher {
 
         RealMatrix keyTextToMatrix = getMatrixFromText(keyText, keySize);
 
-        return (ArithmeticUtils.gcd((int) (new EigenDecomposition(keyTextToMatrix).getDeterminant()), CIPHER_MODULO) == 1);
+        double determinant = new EigenDecomposition(keyTextToMatrix).getDeterminant();
+
+        if (Precision.compareTo(determinant, (int) determinant, EPSILON) != 0) {
+            // means the determinant is not an integer, which we cannot use
+            throw new IllegalArgumentException("The determinant of your matrix is not an integer!");
+        }
+
+        // We require that the GCD of the determinant and our modulo 26 must be zero
+        return (ArithmeticUtils.gcd((int) determinant, CIPHER_MODULO) == 1);
 
     }
 
+    /**
+     *
+     * @param plaintext
+     * @param keyText
+     * @param keySize
+     * @return
+     */
     public static String getEncryptedText(String plaintext, String keyText, int keySize) {
         RealMatrix plaintextMatrix = getMatrixFromText(plaintext, keySize);
         RealMatrix keyTextMatrix = getMatrixFromText(keyText, keySize);
@@ -146,6 +203,7 @@ public class HillCipher {
                 RealVector v1 = new ArrayRealVector(currentPlaintextRow);
                 RealVector v2 = new ArrayRealVector(currentKeyColumn);
 
+                // Using the formula for the ciphertext
                 ciphertext += ALPHABET.charAt(((int) (v1.dotProduct(v2)) % CIPHER_MODULO));
             }
 
@@ -155,11 +213,12 @@ public class HillCipher {
 
     }
 
-    public static RealMatrix getInverseKey(RealMatrix keyMatrix) {
+    public static RealMatrix getInverseKey(RealMatrix keyMatrix) throws IllegalArgumentException{
         int inverseDeterminant = getInverseDeterminant(keyMatrix);
 
         if (inverseDeterminant == -1) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("The determinant of your matrix does " +
+                                               "not have a multiplicative inverse modulo 26.");
         }
 
         RealMatrix keyInverseMatrix = getAdjointMatrix(keyMatrix);
@@ -236,10 +295,10 @@ public class HillCipher {
 //        String keyText1 = "ABBA";
 //        var keyMatrix1 = getMatrixFromText(keyText1, 2);
 //
-        String plaintext = "time to study!";
-        var plaintextMatrix = getMatrixFromText(plaintext, 3);
-
-        System.out.println(plaintextMatrix);
+//        String plaintext = "time to study!";
+//        var plaintextMatrix = getMatrixFromText(plaintext, 3);
+//
+//        System.out.println(plaintextMatrix);
         /*
         19 8 12
         4 19 14
@@ -247,20 +306,15 @@ public class HillCipher {
         3 24 23
          */
 
-//        System.out.println(getEncryptedText("imgonnanuttobinarysearchtreexx", "BEAHLCAFB", 3));
+        String plaintext = "My favorite subject so far is linear algebra!";
+        System.out.println(plaintext);
 
-//        System.out.println(getInverseKey(getMatrixFromPlaintext(keyText, 3)));
+        String keyText = "BEAHLCAFB";
 
-//        System.out.println(getDecryptedText("omebennjuwrafbdpvgumifvlixmjur", "BEAHLCAFB", 3));
+        String encryptedText = getEncryptedText(plaintext, keyText, 3);
+        System.out.println(encryptedText);
 
-
-        /*
-        known plaintext: imgonnanuttobinarysearchtreexx
-        known ciphertext: omebennjuwrafbdpvgumifvlixmjur
-
-        known plaintext: imcurrentlyinareviewsession
-        known ciphertext: osajozrutxkenhrvbyckkasccrp
-         */
+        System.out.println(getDecryptedText(encryptedText, keyText, 3));
 
     }
 
