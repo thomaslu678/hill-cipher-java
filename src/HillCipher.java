@@ -4,6 +4,7 @@ import org.apache.commons.math3.util.Precision;
 
 import java.time.chrono.IsoEra;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class HillCipher {
 
@@ -306,15 +307,25 @@ public class HillCipher {
         3 24 23
          */
 
-        String plaintext = "My favorite subject so far is linear algebra!";
-        System.out.println(plaintext);
+        Scanner in = new Scanner(System.in);
 
-        String keyText = "BEAHLCAFB";
+        System.out.println("Enter your plaintext: ");
+
+        String plaintext = in.nextLine();
+
+//        String plaintext = "My favorite subject so far is linear algebra!";
+//        System.out.println(plaintext);
+
+        System.out.println("Enter your keytext:");
+
+        String keyText = in.nextLine();
+
+//        String keyText = "BEAHLCAFB";
 
         String encryptedText = getEncryptedText(plaintext, keyText, 3);
-        System.out.println(encryptedText);
+        System.out.println("Your encrypted text is: " + encryptedText);
 
-        System.out.println(getDecryptedText(encryptedText, keyText, 3));
+        System.out.println("Your decrypted text is: " + getDecryptedText(encryptedText, keyText, 3));
 
     }
 
