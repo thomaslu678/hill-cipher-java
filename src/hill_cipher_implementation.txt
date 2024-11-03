@@ -1,0 +1,16 @@
+STEP 1: from plaintext to matrix
+    cleaning up the plaintext
+    conversion of characters into numbers
+
+To encrypt:
+
+STEP 2: method that multiplies plaintext matrix by key matrix,
+        while converting numbers into modulo 26
+
+To decrypt:
+
+STEP 3: need to get adjugate matrix
+STEP 4: need to get inverse determinant modulo 26
+        include checks if the inverse exists
+STEP 5: get inverse of key modulo 26,
+        which is the product of STEP 3 and STEP 4
