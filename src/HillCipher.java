@@ -3,6 +3,7 @@ import org.apache.commons.math3.util.ArithmeticUtils;
 import org.apache.commons.math3.util.Precision;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Scanner;
 
 public class HillCipher {
@@ -150,7 +151,7 @@ public class HillCipher {
 
         double determinant = new EigenDecomposition(matrix).getDeterminant();
 
-        if (Precision.compareTo(determinant, (int) determinant, EPSILON) != 0) {
+        if ((Math.abs(determinant - (int) determinant)) > EPSILON) {
             // means the determinant is not an integer, which we cannot use
             throw new IllegalArgumentException("The determinant of your matrix is not an integer!");
         }
@@ -195,6 +196,11 @@ public class HillCipher {
      * @return the ciphertext
      */
     public static String getCiphertext(String plaintext, String keyText, int keySize) {
+
+        if (!isValidKey(keyText, keySize)) {
+            throw new IllegalArgumentException("Your key is invalid and we cannot decrypt using it!");
+        }
+
         RealMatrix plaintextMatrix = getMatrixFromText(plaintext, keySize);
         RealMatrix keyTextMatrix = getMatrixFromText(keyText, keySize);
         String ciphertext = "";
@@ -261,6 +267,7 @@ public class HillCipher {
      * @return the plaintext
      */
     public static String getPlaintext(String ciphertext, String keyText, int keySize) {
+
         RealMatrix ciphertextMatrix = getMatrixFromText(ciphertext, keySize);
         RealMatrix keyTextInverseMatrix = getInverseKey(getMatrixFromText(keyText, keySize));
         String plaintext = "";
@@ -285,25 +292,28 @@ public class HillCipher {
 
         Scanner in = new Scanner(System.in);
 
+        // Valid 3x3 key: BEAHLCAFB
+        // Invalid 3x3 key: BCDBABBBB
+        // Valid 2x2 key: BAAD
+        // INVALID 2x2 key: ACAC
+
         System.out.println("Enter your plaintext: ");
 
         String plaintext = in.nextLine();
 
-//        String plaintext = "My favorite subject so far is linear algebra!";
-//        System.out.println(plaintext);
-
-        System.out.println("Enter your keytext:");
+        System.out.println("\nEnter your keytext:");
 
         String keyText = in.nextLine();
 
-//        String keyText = "BEAHLCAFB";
+        System.out.println("\nEnter your block size: ");
 
-        String encryptedText = getCiphertext(plaintext, keyText, 3);
-        System.out.println("Your encrypted text is: " + encryptedText);
+        int blockSize = in.nextInt();
 
-        System.out.println("Your decrypted text is: " + getPlaintext(encryptedText, keyText, 3));
+        String encryptedText = getCiphertext(plaintext, keyText, blockSize);
+        System.out.println("\nYour encrypted text is: " + encryptedText);
+
+        System.out.println("Your decrypted text is: " + getPlaintext(encryptedText, keyText, blockSize));
 
     }
-
 
 }

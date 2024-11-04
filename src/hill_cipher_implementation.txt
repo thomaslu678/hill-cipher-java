@@ -4,7 +4,7 @@ STEP 1: from plaintext to matrix
 
 To encrypt:
 
-STEP 2: method that multiplies plaintext matrix by key matrix,
+STEP 2: method that key matrix by multiplies plaintext vector (matrix),
         while converting numbers into modulo 26
 
 To decrypt:
