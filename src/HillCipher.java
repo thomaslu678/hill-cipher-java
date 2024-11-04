@@ -3,7 +3,6 @@ import org.apache.commons.math3.util.ArithmeticUtils;
 import org.apache.commons.math3.util.Precision;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Scanner;
 
 public class HillCipher {
@@ -31,18 +30,18 @@ public class HillCipher {
      */
     public static RealMatrix getMatrixFromText(String text, int blockSize) {
 
-        // Cleaning up the input text so it only contains a String of alphabet characters
+        // Cleaning up the input text so that it only contains a String of alphabet characters
         text = removeGrammarAndWhitespace(text);
 
         // 24 / 5 = we need 5 outer blocks with 1 padding
         // 26 / 5 = we need 6 blocks with 4 padding... etc.
-        // Thus outer matrix size is the ceiling of the diviison
+        // Thus, outer matrix size is the ceiling of the division
         int numRows = (int) Math.ceil((double)(text.length()) / (blockSize));
 
         // creating the 2d array to hold the values of each character converted into a number
         double[][] data = new double[numRows][blockSize];
 
-        // looping through every element of the plaintext so we can place it in our data array
+        // looping through every element of the plaintext, so we can place it in our data array
         for (int i = 0; i < data.length * data[0].length; i++) {
 
             int currentRow = i % blockSize; // integer modulus gives us the current row
